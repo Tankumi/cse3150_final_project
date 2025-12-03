@@ -18,7 +18,7 @@ public:
         receivedQueue = q;
     }
     void update() override;
-    std::unordered_map<Prefix, Announcement> getLocalRib();
+    std::unordered_map<Prefix, Announcement>& getLocalRib();
     void newAnnouncement(const Announcement& a) override;
     Announcement getAnnouncement(const Prefix& pre) override;
     Announcement best(const Prefix& pre) override;

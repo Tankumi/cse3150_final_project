@@ -55,9 +55,11 @@ int main(int argc, char* argv[]){
         cout << "Cycle detected." << endl;
         return 1;
     }
-    cout << g.nodes.size() << endl;
-    cout << g.nodes[1]->peers.size() << endl;
-    
+    //cout << g.nodes.size() << endl;
+    //cout << g.nodes[1]->peers.size() << endl;
+    //g.getNode(3)->print_relationships();
+    //cout << "Node 4:" << endl;
+    //g.getNode(4)->print_relationships();
 
 
 
@@ -121,48 +123,64 @@ int main(int argc, char* argv[]){
         for(auto& a : g.nodes){
             if(a.second->rank == i){
                 for(auto b : a.second->providers){
-                    if(b->rank == -1 || b->rank > i+1){
-                        b->rank = i+1;
-                        finished = false;
-                    }
+                    finished = false;
+                    b->rank = i+1;
                     
                 }
             }
         }
         i++;
     }
-    cout << g.getNode(1)->rank << endl;
-    cout << g.getNode(149)->rank << endl;
+    //cout << g.getNode(1)->rank << endl;
+    //cout << g.getNode(149)->rank << endl;
     
+    int maxRank = 0;
+    for (auto& a : g.nodes){
+        if (a.second->rank > maxRank){
+            maxRank = a.second->rank;
+        }
+    }
+        
 
-
-    bool finished2 = false;
-    int j = 0;
-    while(!finished2){
-        finished2 = true;
+    for(int j = 0; j <= maxRank; j++){
         for(auto& a : g.nodes){
             if(a.second->rank == j){
-                a.second->policy->update();
-                finished2 = false;
                 a.second->policy->sendProviders();
             }
         }
-        j++;
+        for(auto& a : g.nodes){
+            a.second->policy->update();
+        }
+        
+        
     }
     for(auto& a : g.nodes){
-        a.second->policy->sendPeers();
+        a.second->policy->sendPeers(); 
     }
-    j--;
-    while(j >= 0){
+    for(auto& a : g.nodes){
+        a.second->policy->update();
+    }
+    
+    
+    for(int i = maxRank+1; i >= -1; i--){
         for(auto& a : g.nodes){
-            if(a.second->rank == j){
-                a.second->policy->update();
+            if(a.second->rank == i){
+                
                 a.second->policy->sendCustomers();
+                
             }
         }
-        j--;
+        for(auto& a : g.nodes){
+            a.second->policy->update();
+        }
+        
+        
+ 
     }
-
+    std::cout << "rank: " << std::endl;
+    std::cout << g.getNode(47605)->rank << endl;
+    std::cout << "rib: " << std::endl;
+    std::cout << g.getNode(47605)->policy->getLocalRib().size() << endl;
     std::ofstream file4("output.csv"); // open CSV file
 
     if (!file4.is_open()) {
@@ -174,7 +192,7 @@ int main(int argc, char* argv[]){
 
     // Write rows
     
-    file4 << "asn,prefix,as_path" << "\n";
+    file4 << "rasn,prefix,as_path" << "\n";
     for(auto& e : g.nodes){
         for(auto& f : e.second->policy->getLocalRib()){
             file4 << e.first << "," << f.first.toString() << "," << f.second.path_string() << "\n";
@@ -183,8 +201,10 @@ int main(int argc, char* argv[]){
     }
     file4.close();
     std::cout << "CSV written successfully.\n";
-    
-
+    //g.getNode(47605)->print_relationships();
+    std::cout << g.getNode(51935)->rank << std::endl;
+    cout << "rib: " << endl;
+    std::cout << g.getNode(47605)->policy->getLocalRib().size() << endl;
     // g.add_pc(1, 2);
     // g.add_pc(2, 3);
     // g.add_pc(3, 4);
